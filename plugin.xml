@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-biometry-keychain-access"
+		version="3.3.0">
+    <name>BiometryKeyChainAccess</name>
+	  <author>Chi Dov</author>
+    <description>Biometry Keychain cordova plugin for iOS</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,touchid,keychain,plugin</keywords>
+    <engines>
+      <engine name="cordova" version=">=3.0.0"/>
+    </engines>
+
+    <repo>https://github.com/Dovchiproeng/cordova-plugin-biometry-keychain-access</repo>
+    <issue>https://github.com/Dovchiproeng/cordova-plugin-biometry-keychain-access/issues</issue>
+	  <js-module src="www/keychain.js" name="BiometryKeychainAccess">
+        <clobbers target="window.plugins.keychain" />
+    </js-module>
+
+    <platform name="ios">
+        <dependency id="cordova-plugin-add-swift-support" version="^1.7.2"/>
+        
+        <config-file target="config.xml" parent="/*">
+            <feature name="TouchID">
+                <param name="ios-package" value="BiometryKeychainAccess"/>
+            </feature>
+        </config-file>
+        <source-file src="src/ios/BiometryKeychainAccess.swift" />
+        <source-file src="src/ios/KeychainItem.swift" />
+        <framework src="Security.framework" />
+        <framework src="Foundation.framework"/>
+        <framework src="LocalAuthentication.framework"/>
+    </platform>
+
+</plugin>
