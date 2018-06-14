@@ -18,7 +18,7 @@ public final class KeychainItem {
     
     var keyChainItemServiceName: String
     init() {
-        // Add a Netspend Specific service name to query the correct keychain item if multiple apps use this plugin
+        // Add a specific service name to query the correct keychain item if multiple apps use this plugin
         let bundleID = Bundle.main.infoDictionary?["CFBundleIdentifier"] as? String
         keyChainItemServiceName = (bundleID ?? "") + ".TouchIDPlugin"
     }
@@ -120,7 +120,7 @@ public final class KeychainItem {
         var attributes = [String: Any]()
         attributes[Account] = key;
         attributes[Service] = keyChainItemServiceName
-        // Convert the password NSString to NSData to fit the API paradigm:
+        // Convert the password String to Data to fit the API paradigm:
         guard let password = value.data(using: .utf8) else {
             print("failed to convert string to data")
             throw ResponseStatus.conversionError
