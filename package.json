@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-biometry-keychain-access",
-  "version": "3.3.0",
+  "version": "1.0.0",
   "description": "Use iPhone biometry sensor (FaceID or TouchID) to access to keychain",
   "cordova": {
     "id": "cordova-plugin-biometry-keychain-access",
@@ -21,6 +21,7 @@
     "Biometric",
     "Scanner",
     "KeyChain",
+    "authentication",
     "ecosystem:cordova",
     "cordova-ios"
   ],
@@ -36,6 +37,9 @@
     "url": "https://github.com/Dovchiproeng/cordova-plugin-biometry-keychain-access/issues"
   },
   "homepage": "https://github.com/Dovchiproeng/cordova-plugin-biometry-keychain-access#readme",
+  "dependencies": {
+    "cordova-plugin-add-swift-support": "^1.7.2"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
