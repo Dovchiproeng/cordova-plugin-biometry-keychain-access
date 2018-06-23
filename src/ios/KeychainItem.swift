@@ -15,6 +15,7 @@ public final class KeychainItem {
     private let ReturnData = String(kSecReturnData)
     private let ValueData = String(kSecValueData)
     private let AccessControl = String(kSecAttrAccessControl)
+    private let MessagePrompt = String(kSecUseOperationPrompt)
     
     var keyChainItemServiceName: String
     init() {
@@ -52,9 +53,10 @@ public final class KeychainItem {
         }
     }
     
-    func getValueFromKeyChain(key: String) throws -> String?
+    func getValueFromKeyChain(key: String, messagePrompt: String) throws -> String?
     {
-        let query = getFindOneValueKeychainQuery(key: key)
+        var query = getFindOneValueKeychainQuery(key: key)
+        query[MessagePrompt] = messagePrompt
     
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -217,7 +219,7 @@ extension ResponseStatus: RawRepresentable, CustomStringConvertible {
         case .conversionError:
             return "conversion.error"
         case .unexpectedError:
-            return "server.error"
+            return "plugin.error"
         }
     }
 }

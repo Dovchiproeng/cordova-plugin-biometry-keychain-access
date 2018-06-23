@@ -19,7 +19,7 @@ import LocalAuthentication
         
         let available = authenticationContext.canEvaluatePolicy(policy, error: &error)
         
-        var pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Not available")
+        var pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: PluginError.BIOMETRICS_NOT_AVAILABLE)
         if available == true {
             if #available(iOS 11.0, *) {
                 switch(authenticationContext.biometryType) {
@@ -39,76 +39,78 @@ import LocalAuthentication
     }
     
     @objc func has(_ command: CDVInvokedUrlCommand) {
-        let tag = command.arguments[0] as? String
-        let hasLoginKey: Bool = UserDefaults.standard.bool(forKey: tag!)
+        guard let tag = command.arguments[0] as? String else {
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.INVALID_ARGUMENT, command: command)
+            return
+        }
+        let hasLoginKey: Bool = UserDefaults.standard.bool(forKey: tag)
         if hasLoginKey {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK)
-            commandDelegate.send(pluginResult, callbackId: command.callbackId)
+            pluginResponse(status: CDVCommandStatus_OK, command: command)
         } else {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "No Password in chain")
-            commandDelegate.send(pluginResult, callbackId: command.callbackId)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.USER_NOT_FOUND, command: command)
         }
     }
     
     @objc func save(_ command: CDVInvokedUrlCommand?) {
-        let tag = command?.arguments[0] as? String
-        let password = command?.arguments[1] as? String
+        guard let tag = command?.arguments[0] as? String, let password = command?.arguments[1] as? String else {
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.INVALID_ARGUMENT, command: command)
+            return
+        }
         do {
             let keychainItem = KeychainItem()
-            try keychainItem.setValueToKeyChain(value: password!, key: tag!)
-            UserDefaults.standard.set(true, forKey: tag!)
+            try keychainItem.setValueToKeyChain(value: password, key: tag)
+            UserDefaults.standard.set(true, forKey: tag)
             UserDefaults.standard.synchronize()
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            pluginResponse(status: CDVCommandStatus_OK, command: command)
         } catch let errorStatus as ResponseStatus{
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: errorStatus.description)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: errorStatus.description, command: command)
         } catch {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.localizedDescription)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+           pluginResponse(status: CDVCommandStatus_ERROR, message: error.localizedDescription, command: command)
         }
     }
     
     @objc func delete(_ command: CDVInvokedUrlCommand?) {
-        let tag = command?.arguments[0] as? String
+        guard let tag = command?.arguments[0] as? String else {
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.INVALID_ARGUMENT, command: command)
+            return
+        }
         do {
-            if (tag != nil) && UserDefaults.standard.object(forKey: tag!) != nil {
+            if UserDefaults.standard.object(forKey: tag) != nil {
                 let keychainItem = KeychainItem()
-                try keychainItem.deleteValueFromKeyChain(key: tag!)
+                try keychainItem.deleteValueFromKeyChain(key: tag)
             }
-            UserDefaults.standard.removeObject(forKey: tag!)
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            UserDefaults.standard.removeObject(forKey: tag)
+            pluginResponse(status: CDVCommandStatus_OK, command: command)
         } catch let errorStatus as ResponseStatus {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: errorStatus.description)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: errorStatus.description, command: command)
         } catch let error {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Could not delete password from chain: " + error.localizedDescription)
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: "Could not delete password from chain: " + error.localizedDescription, command: command)
         }
     }
     
     @objc func verify(_ command: CDVInvokedUrlCommand?) {
-        let tag = command?.arguments[0] as? String
+        guard let tag = command?.arguments[0] as? String else {
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.INVALID_ARGUMENT, command: command)
+            return
+        }
         let message = command?.arguments[1] as? String
-        let hasLoginKey: Bool = UserDefaults.standard.bool(forKey: tag!)
+        let hasLoginKey: Bool = UserDefaults.standard.bool(forKey: tag)
         if hasLoginKey {
             do {
                 let keychainItem = KeychainItem()
-                let password = try keychainItem.getValueFromKeyChain(key: tag!)
-                let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: password)
-                commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+                guard let password = try keychainItem.getValueFromKeyChain(key: tag, messagePrompt: message ?? "") else {
+                    pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.KEYCHAIN_EXPIRED, command: command)
+                    return
+                }
+                pluginResponse(status: CDVCommandStatus_OK, message: password, command: command)
             } catch let errorStatus as ResponseStatus {
-                let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: errorStatus.description)
-                commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+                pluginResponse(status: CDVCommandStatus_ERROR, message: errorStatus.description, command: command)
             } catch let error{
-                let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.localizedDescription)
-                commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+                pluginResponse(status: CDVCommandStatus_ERROR, message: error.localizedDescription, command: command)
             }
         }
         else {
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "-1")
-            commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: PluginError.USER_NOT_FOUND, command: command)
         }
     }
     override func pluginInitialize() {
@@ -120,5 +122,17 @@ import LocalAuthentication
         }
 
         policy = .deviceOwnerAuthentication
+
     }
+    
+    func pluginResponse(status: CDVCommandStatus, message: String? = nil, command: CDVInvokedUrlCommand?){
+        let pluginResult = CDVPluginResult(status: status, messageAs: message)
+        commandDelegate.send(pluginResult, callbackId: command?.callbackId)
+    }
+}
+public enum PluginError{
+    static let BIOMETRICS_NOT_AVAILABLE = "biometrics.not_available"
+    static let KEYCHAIN_EXPIRED = "security_key.expired"
+    static let USER_NOT_FOUND = "user.not_found"
+    static let INVALID_ARGUMENT = "argument.invalid"
 }
