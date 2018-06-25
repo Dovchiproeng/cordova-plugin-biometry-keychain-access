@@ -4,8 +4,8 @@ var keychain = {
   isAvailable: function(successCallback, errorCallback) {
     exec(successCallback, errorCallback, 'BiometryKeychainAccess', 'isAvailable', []);
   },
-  save: function(key, password, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BiometryKeychainAccess', 'save', [key,password]);
+  save: function(key, password, userAuthenticationRequired, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BiometryKeychainAccess', 'save', [key, password, userAuthenticationRequired]);
   },
   verify: function(key, message, successCallback, errorCallback) {
     exec(successCallback, errorCallback, 'BiometryKeychainAccess', 'verify', [key, message]);
