@@ -89,7 +89,7 @@ import LocalAuthentication
         } catch let errorStatus as ResponseStatus {
             pluginResponse(status: CDVCommandStatus_ERROR, message: errorStatus.description, command: command)
         } catch let error {
-            pluginResponse(status: CDVCommandStatus_ERROR, message: "Could not delete password from chain: " + error.localizedDescription, command: command)
+            pluginResponse(status: CDVCommandStatus_ERROR, message: error.localizedDescription, command: command)
         }
     }
     
