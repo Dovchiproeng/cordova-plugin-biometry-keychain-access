@@ -12,40 +12,41 @@ window.plugins.keychain.isAvailable(
 );
 ```
 ### Has Keychain
+Check whether key existed
 ```javascript
 window.plugins.keychain.has(
-'cdov',
-function(result){alert(result)},
-function(error){alert(error)}
+'cdov', // key
+function(){alert(true)}, // success callback
+function(error){alert(error)} // error callback: user.not_found
 );
 ```
 
 ### Save data to Keychain
 ```javascript
 window.plugins.keychain.save(
-'cdov',
-'password',
-true,
-function(){alert(true)},
-function(error){alert(error)}
+'cdov', // key
+'password', // data
+true, // authentication required if true will required biometrics verification to perform this operation
+function(){alert(true)}, // success callback
+function(error){alert(error)} // error callback: user.not_found
 );
 ```
 
 ### Verify biometrics and retrive data from keychain
 ```javascript
 window.plugins.keychain.verify(
-'cdov',
-'message',
-function(result){alert(result)},
-function(error){alert(error)}
+'cdov', // key
+'message', // authentication UI prompted message
+function(data){alert(data)}, // success callback: with data return
+function(error){alert(error)} // error callback
 );
 ```
 
 ### Delete data from keychain 
 ```javascript
 window.plugins.keychain.delete(
-'cdov',
-function(result){alert(result)},
-function(error){alert(error)}
+'cdov', // key
+function(){alert(true)}, //success callback
+function(error){alert(error)} //error callback
 );
 ```
